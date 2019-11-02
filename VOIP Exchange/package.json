@@ -1,0 +1,23 @@
+{
+  "name": "voip-exchange",
+  "version": "1.0.0-beta",
+  "description": "SIP exchange server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "voip",
+    "sip"
+  ],
+  "author": "Konrad Krzysztof Sobczak",
+  "license": "SEE LICENSE IN LICENSE.MD",
+  "dependencies": {
+    "audio-lena": "^2.1.1",
+    "krtp": "^3.0.0",
+    "querystring": "^0.2.0",
+    "readline-completer": "^1.1.0",
+    "sip.js": "^0.13.5",
+    "ws": "^6.1.3"
+  }
+}

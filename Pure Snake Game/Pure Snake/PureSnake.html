@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pure Snake</title>
+	<style type="text/css">
+		html,
+		body {
+			margin: 0;
+			height: 100%;
+			background-color: #000000;
+		}
+		canvas {
+			position: relative;
+			left: 50%;
+			top: 60%;
+			transform: translate(-50%, -100%);
+			border-color: white;
+			border-width: 5px;
+		}
+		#overlay {
+			visibility: hidden;
+			z-index: 1000;
+			width: 100%;
+			height: 100%;
+			background-color: black;
+			color: white;
+			position: absolute;
+		}
+		#overlay div {
+			position: relative;
+			left: 50%;
+			top: 50%;
+			height: 70%;
+			width: auto;
+			transform: translate(-50%, -50%);
+		}
+
+		#overlay .logo {
+			height: 50%;
+			position: relative;
+			left: 50%;
+			top: 30%;
+			transform: translate(-50%, -50%);
+		}
+
+		#overlay #msg {
+			height: 20%;
+			position: relative;
+			left: 50%;
+			top: 30%;
+			transform: translate(-50%, -50%);
+		}
+
+		#logo {
+			position: relative;
+			left: 50%;
+			top: 10%;
+			transform: translateX(-50%);
+			height: 25%;
+		}
+	</style>
+</head>
+<body>
+	<!-- Lets make a simple snake game -->
+	<!-- Based on original code created by thecodeplayer.com -->
+	<div id="overlay">
+		<div>
+			<img id="ovlogo" class="logo" src="logo.png"/>
+			<br>
+			<img id="msg" src="space.png"/>
+		</div>
+	</div>
+	<!- create a canvas element for the code to manipulate -->
+	<img id="logo" src="logo.png"/><br>
+	<canvas id="canvas" width="300" height="300"></canvas>
+
+	<!-- And our snake code -->
+	<script src="PureSnakeCore.js"></script>
+
+	<script>
+		var msg = document.getElementById("msg");
+		var ovlogo = document.getElementById("ovlogo");
+		var overlay = document.getElementById("overlay");
+		var paused = false;
+		var timeouts = [];
+		var intr = 120;
+
+		//creates the snake ready for the start of the game
+		function createSnake() {
+		    snakeArray = []; //Empty array to start with
+
+		    snakeArray[0] = {
+		        x: 6,
+		        y: 0
+		    }; //position 0 in the array is the head of the snake
+		    snakeArray[1] = {
+		        x: 5,
+		        y: 0
+		    };
+		    snakeArray[2] = {
+		        x: 4,
+		        y: 0
+		    };
+		    createFoodTimeout();
+		}
+
+		//set it so that when the user hits a key the keystroke function is called
+		document.onkeydown = keystroke
+
+		function keystroke(e) {
+		    //TODO: fix this so that it changes the value of direction according to the key
+		    //Keycodes for arrow keys: left=37, up=38, right=39, down=40
+		    //Keycodes for wasd: a=65, w=87, d=68, s=83
+		    //E.g. evt.keyCode==37 is true if the left arrow key was pressed
+		    if (e.keyCode == 32) {
+		    	pauseGame();
+		    } else if (d != "right" && e.keyCode == 37) {
+		        d = "left";
+		    } else if (d != "left" && e.keyCode == 39) {
+		        d = "right";
+		    } else if (d != "up" && e.keyCode == 40) {
+		        d = "down";
+		    } else if (d != "down") {
+		        d = "up";
+		    }
+		}
+
+		//The movement code for the snake, including eating food, and checking for crashes
+		function updateSnake(direction) {
+		    //We need to calculate the x position and y position of the new head
+		    //First get the current position of the head of the snake
+		    var nx = snakeArray[0].x;
+		    var ny = snakeArray[0].y;
+
+		    //Now adjust these values according to the direction of travel
+		    if (direction == "right") nx++;
+		    else if (direction == "left") nx--;
+		    else if (direction == "up") ny--;
+		    else if (direction == "down") ny++;
+		    //nx and ny now contain the new x and new y positions of the head
+
+		    //Now check for game over conditions
+		    //This will restart the game if the snake hits the wall or its own body
+		    if (checkCollision(nx, ny, snakeArray)) {
+		        //restart game
+		        init("over");
+		        return;
+		    }
+
+		    var newhead = {
+		        x: nx,
+		        y: ny
+		    };
+		    snakeArray.unshift(newhead);
+		    if (!(nx == food.x && ny == food.y)) {
+		        snakeArray.pop(); //pops out the last cell (the end of the tail)	
+		    } else {
+		        createFoodTimeout();
+		        score += 1;
+		        if (score % 5 == 0) {
+		            clearInterval(game_loop);
+		            intr = 120 - 3 * score / 5;
+		            game_loop = setInterval(paint, intr);
+		        }
+		    }
+		}
+
+		//Lets create the food now
+		function createFood() {
+		    //TODO: set the food to a random position: x= 0 to maxx, y=0 to maxy
+		    //Math.random() generates a random number between 0 and 1
+		    //Math.round(number) rounds the number to the nearest integer
+		    //The coordinates need to be integers between 0,maxx and 0,maxy
+		    var rx = Math.floor(Math.random() * 30);
+		    var ry = Math.floor(Math.random() * 30);
+		    food = {
+		        x: rx,
+		        y: ry
+		    };
+		}
+
+		//returns true if the snake has hit a wall (this is easy to get wrong by one cell so test your solution)
+		//or if it has hit itself (x and y exist in the array)
+		function checkCollision(x, y, array) {
+		    //TODO: fix this function so that it checks for collisions properly
+		    if (x < 0 || x > 29 || y < 0 || y > 29) {
+		        return true;
+		    }
+		    var toCheck = array.slice(1);
+		    for (var point of toCheck) {
+		        if (x == point.x && y == point.y) {
+		            return true;
+		        }
+		    }
+		    return false;
+		}
+
+		function createFoodTimeout() {
+		    createFood();
+		    for (var timeout of timeouts) {
+		        clearTimeout(timeout);
+		    }
+		    timeouts = [];
+		    timeouts.push(setTimeout(createFoodTimeout, 15000));
+		}
+
+		function pauseGame(msgText){
+			if(msgText == "over"){
+				msg.src = "over.png";
+				msg.style.top = "0%";
+				ovlogo.style.visibility = "hidden";
+			} else {
+				ovlogo.style.visibility = null ;
+				msg.src = "space.png";
+				msg.style.top = "30%";
+			}
+			if(!paused){
+				overlay.style.visibility = "visible";
+				for (var timeout of timeouts) {
+					var time = getTimeout(timeout);
+					timeouts = [];
+				    timeouts.push(time);
+				    clearTimeout(timeout);
+				}
+				clearInterval(game_loop);
+				paused = true;
+			} else {
+				overlay.style.visibility = "hidden";
+				var t;
+				for (var timeout of timeouts) {
+				    if(typeof timeout == "number"){
+				    	t = setTimeout(createFoodTimeout, timeout);
+				    }
+				}
+				timeouts = [];
+				timeouts.push(t);
+				game_loop = setInterval(paint, intr);
+				paused = false;
+			}
+		}
+	</script>
+</body>
+</html>
